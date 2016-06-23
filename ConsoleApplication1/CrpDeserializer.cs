@@ -20,6 +20,7 @@ namespace ConsoleApplication1
         {
             stream = File.Open(filePath, FileMode.Open);
             reader = new CrpReader(stream);
+            assetParser = new AssetParser(reader);
         }
 
         public void parseFile()
@@ -29,8 +30,7 @@ namespace ConsoleApplication1
             {
                 CrpHeader header = parseHeader();
                 Console.WriteLine(header);
-
-
+                
             }
             else
             {
@@ -61,33 +61,36 @@ namespace ConsoleApplication1
                 output.assets.Add(info);
 
             }
+            string path = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + output.mainAssetName + "_contents";
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            Environment.CurrentDirectory = (path);
 
+            for (int i = 0; i < output.numAssets; i++)
+            {
+                parseAssets(output,output.assets[i].assetSize);
+            }
             return output;
         }
 
-        private void parseAssets(CrpHeader header)
+        private void parseAssets(CrpHeader header,long assetLength)
         {
-            for(int i =0; i<header.numAssets; i++)
+            
+            bool isNullFlag = reader.ReadBoolean();
+            if (!isNullFlag)
             {
-                bool isNullFlag = reader.ReadBoolean();
-                if(!isNullFlag)
-                {
-                    string assemblyQualifiedName = reader.ReadString();
-                    string assetType = new AssemblyName(assemblyQualifiedName).FullName;
-                    long assetLen = header.assets[i].assetSize - ( sizeof(bool) + sizeof(byte) + assetType.Length );
-                    string assetName = header.assets[i].assetName;
+                string assemblyQualifiedName = reader.ReadString();
+                string assetType = assemblyQualifiedName.Split(new char[] { ',' })[0];
+                long assetContentLen = assetLength - (2 + assemblyQualifiedName.Length);
+                string assetName = reader.ReadString();
+                assetContentLen -= (1 + assetName.Length);
 
-                    if (!(assetType == "UnityEngine.Mesh" && typeRefCount.ContainsKey(assetType))) {
-                        assetName = reader.ReadString();
-                        assetLen -= (sizeof(byte) + assetName.Length);
-                    }
-                    if (typeRefCount.ContainsKey(assetType))
-                    {
-
-                    }
-                    assetParser.parseAsset(assetType, assetLen);
-                }
+                assetParser.parseObject((int)assetContentLen, assetType, true, assetName);
             }
+
+           
         }
 
     }

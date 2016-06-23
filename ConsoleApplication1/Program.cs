@@ -36,11 +36,18 @@ namespace ConsoleApplication1
         static void Main(string[] args)
         {
             var options = new Options();
+#if DEBUG
+
+             CrpDeserializer deserializer = new CrpDeserializer("D:\\Dropbox\\dropbox\\csfileformat\\uk_sign.crp");
+             deserializer.parseFile();
+#else
             if (Parser.Default.ParseArguments(args, options))
             {
                 CrpDeserializer deserializer = new CrpDeserializer(options.InputFile);
                 deserializer.parseFile();
             }
+#endif
+
         }
     }
 }

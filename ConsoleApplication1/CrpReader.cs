@@ -11,9 +11,9 @@ namespace ConsoleApplication1
 {
     public class CrpReader : BinaryReader
     {
-        delegate dynamic CarpObjParser();
+        public delegate dynamic CarpObjParser();
 
-        Dictionary<String, CarpObjParser> singlarObjParser = new Dictionary<String, CarpObjParser> {};
+        public Dictionary<String, CarpObjParser> singlarObjParser = new Dictionary<String, CarpObjParser> {};
         
         public CrpReader(Stream stream) : base(stream) {
             singlarObjParser["System.DateTime"] = () => 
@@ -98,36 +98,60 @@ namespace ConsoleApplication1
             {
                 return (SteamHelper.DLC_BitMask)(this.ReadInt32());
             };
+            singlarObjParser["ColossalFramework.Packaging.Package+Asset"] = () =>
+            {
+                return this.ReadString();
+            };
+            singlarObjParser["CustomAssetMetaData+Type"] = () =>
+            {
+                return (CustomAssetMetaData.Type)(this.ReadInt32());
+            };
         }
 
-        public dynamic readUnityObj(AssemblyName name)
+        public dynamic readUnityObj(string name)
         {
-            if (singlarObjParser.ContainsKey(name.FullName))
+            if (singlarObjParser.ContainsKey(name))
             {
-                return singlarObjParser[name.FullName];
+                return singlarObjParser[name]();
             }
             else
             {
-                throw new KeyNotFoundException(String.Format("Type {0} cannot be parsed! Please file a bug report :(",name.FullName));
+                throw new KeyNotFoundException(String.Format("Type {0} cannot be parsed! Please file a bug report :(",name));
             }
         }
 
-        public dynamic readUnityArray(AssemblyName name)
+        public dynamic readUnityArray(string name)
         {
-            string strippedName = name.FullName.Replace("]", "").Replace("[","");
+            string strippedName = name.Replace("]", "").Replace("[","");
             int numEntries = this.ReadInt32();
-            dynamic[] retVal = new dynamic[numEntries];
+            dynamic[] tempArray = new dynamic[numEntries];
             if (singlarObjParser.ContainsKey(strippedName))
             {
                 for(int i=0; i < numEntries; i++)
                 {
-                    retVal[i] = singlarObjParser[strippedName];
+                    tempArray[i] = singlarObjParser[strippedName]();
                 }
-                return retVal;
+
+                if(numEntries != 0)
+                {
+                    Type t = tempArray[0].GetType();
+                    Array retVal = Array.CreateInstance(t, numEntries);
+                    for (int i = 0; i < numEntries; i++)
+                    {
+                        retVal.SetValue(Convert.ChangeType(tempArray[i], t), i);
+                    }
+
+                    return retVal;
+                }
+                else
+                {
+                    return null;
+                }
+                
             }
             else
             {
-                throw new KeyNotFoundException(String.Format("Type {0} cannot be parsed! Please file a bug report :(", name.FullName));
+                throw new KeyNotFoundException(String.Format("Type {0} cannot be parsed! Please file a bug report :(", name));
             }
         }
 
