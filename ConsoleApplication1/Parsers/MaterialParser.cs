@@ -10,7 +10,7 @@ namespace ConsoleApplication1.Parsers
 {
     class MaterialParser
     {
-        public static MaterialStub parseMaterial(CrpReader reader, bool saveFile, string saveFileName,long fileSize)
+        public static MaterialStub parseMaterial(CrpReader reader, bool saveFile, string saveFileName,long fileSize,bool verbose)
         {
             long fileContentBegin = reader.BaseStream.Position;
             MaterialStub retVal = new MaterialStub();
@@ -49,15 +49,18 @@ namespace ConsoleApplication1.Parsers
                 int bytesToRead = (int)(fileSize - (reader.BaseStream.Position - fileContentBegin));
                 reader.ReadBytes(bytesToRead);
             }
+            string fileName = saveFileName + ".json";
+            string json = JsonConvert.SerializeObject(retVal, Formatting.Indented);
+            if(verbose)
+            {
+                Console.WriteLine("Read info file {0}", fileName);
+                Console.WriteLine(json);
+            }
             if (saveFile)
             {
-                if (saveFile)
-                {
-                    string json = JsonConvert.SerializeObject(retVal, Formatting.Indented);
-                    StreamWriter file = new StreamWriter(new FileStream(saveFileName + ".json", FileMode.Create));
-                    file.Write(json);
-                    file.Close();
-                }
+                StreamWriter file = new StreamWriter(new FileStream(saveFileName + ".json", FileMode.Create));
+                file.Write(json);
+                file.Close();
             }
 
             return retVal;

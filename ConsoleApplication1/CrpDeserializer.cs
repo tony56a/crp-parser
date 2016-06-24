@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CrpParser;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,14 +24,32 @@ namespace ConsoleApplication1
             assetParser = new AssetParser(reader);
         }
 
-        public void parseFile()
+        public void parseFile(Options options)
         {
             string magicStr = new string(reader.ReadChars(4));
             if (magicStr.Equals(Consts.MAGICSTR))
             {
                 CrpHeader header = parseHeader();
-                Console.WriteLine(header);
-                
+
+                if (options.SaveFiles)
+                {
+                    string path = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + header.mainAssetName + "_contents";
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+                    Environment.CurrentDirectory = (path);
+                }
+
+                if (options.Verbose)
+                {
+                    Console.WriteLine(header);
+                }
+
+                for (int i = 0; i < header.numAssets; i++)
+                {
+                    parseAssets(header, i,options.SaveFiles,options.Verbose);
+                }
             }
             else
             {
@@ -61,21 +80,11 @@ namespace ConsoleApplication1
                 output.assets.Add(info);
 
             }
-            string path = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + output.mainAssetName + "_contents";
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            Environment.CurrentDirectory = (path);
-
-            for (int i = 0; i < output.numAssets; i++)
-            {
-                parseAssets(output,output.assets[i].assetSize);
-            }
+            
             return output;
         }
 
-        private void parseAssets(CrpHeader header,long assetLength)
+        private void parseAssets(CrpHeader header,int index,bool saveFiles,bool isVerbose)
         {
             
             bool isNullFlag = reader.ReadBoolean();
@@ -83,14 +92,14 @@ namespace ConsoleApplication1
             {
                 string assemblyQualifiedName = reader.ReadString();
                 string assetType = assemblyQualifiedName.Split(new char[] { ',' })[0];
-                long assetContentLen = assetLength - (2 + assemblyQualifiedName.Length);
+                long assetContentLen = header.assets[index].assetSize - (2 + assemblyQualifiedName.Length);
                 string assetName = reader.ReadString();
                 assetContentLen -= (1 + assetName.Length);
 
-                assetParser.parseObject((int)assetContentLen, assetType, true, assetName);
+                string fileName = string.Format("{0}_{1}_{2}", assetName, index,header.assets[index].assetType.ToString());
+                assetParser.parseObject((int)assetContentLen, assetType, saveFiles, fileName, isVerbose);
             }
-
-           
+ 
         }
 
     }

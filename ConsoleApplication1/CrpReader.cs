@@ -44,6 +44,10 @@ namespace ConsoleApplication1
             {
                 return this.ReadInt32();
             };
+            singlarObjParser["System.Boolean"] = () =>
+            {
+                return this.ReadBoolean();
+            };
             singlarObjParser["CustomAssetMetaData"] = () =>
             {
                 return (CustomAssetMetaData.Type)(this.ReadInt32());
@@ -78,6 +82,20 @@ namespace ConsoleApplication1
                 }
                 return matrix;
             };
+            singlarObjParser["ItemClass"] = () =>
+            {
+                string retval = this.ReadString();
+                this.ReadBoolean();
+                return (retval);
+            };
+            singlarObjParser["ItemClass+Placement"] = () =>
+            {
+                return (ItemClass.Placement)(this.ReadInt32());
+            };
+            singlarObjParser["ItemClass+Availability"] = () =>
+            {
+                return (ItemClass.Availability)(this.ReadInt32());
+            };
             singlarObjParser["ItemClass+Level"] = () =>
             {
                 return (ItemClass.Level)(this.ReadInt32());
@@ -90,10 +108,39 @@ namespace ConsoleApplication1
             {
                 return (ItemClass.SubService)(this.ReadInt32());
             };
+
+            singlarObjParser["BuildingInfo+PlacementMode"] = () =>
+            {
+                return (BuildingInfo.PlacementMode)(this.ReadInt32());
+            };
+            singlarObjParser["BuildingInfo+ZoningMode"] = () =>
+            {
+                return (BuildingInfo.ZoningMode)(this.ReadInt32());
+            };
+
+            singlarObjParser["TerrainModify+Surface"] = () =>
+            {
+                return (TerrainModify.Surface)(this.ReadInt32());
+            };
+
+            singlarObjParser["BuildingInfo+Prop"] = () =>
+            {
+                Dictionary<string, dynamic> retVal = new Dictionary<string, dynamic>();
+                retVal["enabled"] = this.ReadBoolean();
+                retVal["m_position"] =singlarObjParser["UnityEngine.Vector3"]();
+                retVal["m_angle"] = this.ReadSingle();
+                retVal["m_probability"] = this.ReadInt32();
+                retVal["m_fixedHeight"] = this.ReadBoolean();
+
+                return (TerrainModify.Surface)(this.ReadInt32());
+            };
+
+
             singlarObjParser["VehicleInfo+VehicleType"] = () =>
             {
                 return (VehicleInfo.VehicleType)(this.ReadInt32());
             };
+
             singlarObjParser["SteamHelper+DLC_BitMask"] = () =>
             {
                 return (SteamHelper.DLC_BitMask)(this.ReadInt32());
@@ -106,6 +153,59 @@ namespace ConsoleApplication1
             {
                 return (CustomAssetMetaData.Type)(this.ReadInt32());
             };
+            singlarObjParser["UnityEngine.Transform"] = () =>
+            {
+                Transform transform = new Transform();
+                transform.position = new Vector3(this.ReadSingle(), this.ReadSingle(), this.ReadSingle());
+                transform.rotation = new Vector4(this.ReadSingle(), this.ReadSingle(), this.ReadSingle(), this.ReadSingle());
+                transform.scale = new Vector3(this.ReadSingle(), this.ReadSingle(), this.ReadSingle());
+                return transform;
+            };
+            singlarObjParser["UnityEngine.MeshFilter"] = () =>
+            {
+                return this.ReadString();
+            };
+            singlarObjParser["UnityEngine.MeshRenderer"] = () =>
+            {
+                int numEntries = this.ReadInt32();
+                string[] retVal = new string[numEntries];
+                for (int i = 0; i < numEntries; i++)
+                {
+                    retVal[i] = this.ReadString();
+                }
+                return retVal;
+            };
+            singlarObjParser["BuildingInfo"] = readGameInfo;
+            singlarObjParser["PropInfo"] = readGameInfo;
+
+        }
+
+        public dynamic readGameInfo()
+        {
+            Dictionary<string, dynamic> retVal = new Dictionary<string, dynamic>();
+
+            int numProperties = this.ReadInt32();
+            for (int i = 0; i < numProperties; i++)
+            {
+                bool isNull = this.ReadBoolean();
+                if (!isNull)
+                {
+                    string assemblyQualifiedName = this.ReadString();
+                    string propertyType = assemblyQualifiedName.Split(new char[] { ',' })[0];
+                    string propertyName = this.ReadString();
+                    if (propertyType.Contains("[]"))
+                    {
+                        retVal[propertyName] = this.readUnityArray(propertyType);
+                    }
+                    else
+                    {
+                        retVal[propertyName] = this.readUnityObj(propertyType);
+                    }
+
+                }
+            }
+
+            return retVal;
         }
 
         public dynamic readUnityObj(string name)

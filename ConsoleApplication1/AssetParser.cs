@@ -12,7 +12,7 @@ namespace ConsoleApplication1
     {
         private CrpReader reader;
 
-        delegate dynamic Parser(CrpReader reader, bool saveFile, string saveFileName,long fileSize);
+        delegate dynamic Parser(CrpReader reader, bool saveFile, string saveFileName,long fileSize,bool verbose);
 
         Dictionary<string, Parser> parsers = new Dictionary<string, Parser>();
 
@@ -21,7 +21,6 @@ namespace ConsoleApplication1
 
             this.parsers["ColossalFramework.Importers.Image"] = ImgParser.parseImage;
             this.parsers["UnityEngine.Mesh"] = MeshParser.parseMesh;
-
             this.parsers["UnityEngine.Texture2D"] = ImgParser.parseImage;
             this.parsers["BuildingInfoGen"] = InfoGenParser.parseInfoGen;
             this.parsers["PropInfoGen"] = InfoGenParser.parseInfoGen;
@@ -30,15 +29,17 @@ namespace ConsoleApplication1
             this.parsers["CustomAssetMetaData"] = InfoGenParser.parseInfoGen;
             this.parsers["UnityEngine.Material"] = MaterialParser.parseMaterial;
 
+            //TODO:There are quite a few types that need to be parsed here
+            //this.parsers["UnityEngine.GameObject"] = GameObjectParser.parseGameObj;
 
         }
 
-        public dynamic parseObject(int length, string format, bool saveFile = false, string saveFilePath = null)
+        public dynamic parseObject(int length, string format, bool saveFile = false, string saveFilePath = null,bool verbose=false)
         {
             dynamic retVal;
             if (parsers.ContainsKey(format))
             {
-                retVal = this.parsers[format](reader, saveFile, saveFilePath,length);
+                retVal = this.parsers[format](reader, saveFile, saveFilePath,length,verbose);
 
             }
             else
@@ -50,7 +51,10 @@ namespace ConsoleApplication1
                     file.Write(retVal);
                     file.Close();
                 }
-   
+                if (verbose)
+                {
+                    Console.WriteLine("{0} bytes read for {1}",length, saveFilePath + ".bin");
+                }
             }
             return retVal;
         }

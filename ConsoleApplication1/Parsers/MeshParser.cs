@@ -9,7 +9,7 @@ namespace ConsoleApplication1.Parsers
 {
     class MeshParser
     {
-        public static Mesh parseMesh(CrpReader reader, bool saveFile, string saveFileName, long fileSize)
+        public static Mesh parseMesh(CrpReader reader, bool saveFile, string saveFileName, long fileSize, bool verbose)
         {
             long fileContentBegin = reader.BaseStream.Position;
 
@@ -33,14 +33,16 @@ namespace ConsoleApplication1.Parsers
                 int bytesToRead = (int)(fileSize - (reader.BaseStream.Position - fileContentBegin));
                 reader.ReadBytes(bytesToRead);
             }
+            string fileName = saveFileName + ".obj";
+            if (verbose)
+            {
+                Console.WriteLine("Read {0} bytes into image file {1}", (reader.BaseStream.Position - fileContentBegin), fileName);
+            }
             if (saveFile)
             {
-                if (saveFile)
-                {
-                    StreamWriter file = new StreamWriter(new FileStream(saveFileName + ".obj", FileMode.Create));
-                    file.Write(retVal.exportObj());
-                    file.Close();
-                }
+                StreamWriter file = new StreamWriter(new FileStream(fileName, FileMode.Create));
+                file.Write(retVal.exportObj());
+                file.Close();
             }
             return retVal;
         }

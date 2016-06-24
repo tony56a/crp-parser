@@ -7,8 +7,8 @@
     <ProjectGuid>{5064F3F2-C3CB-4BD2-B7F8-DAC94E75B660}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ConsoleApplication1</RootNamespace>
-    <AssemblyName>ConsoleApplication1</AssemblyName>
+    <RootNamespace>CrpParser</RootNamespace>
+    <AssemblyName>CrpParser</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -65,13 +65,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CrpAssetInfo.cs" />
-    <Compile Include="CrpAssetInfoHeader.cs" />
+    <Compile Include="Models\CrpAssetInfoHeader.cs" />
     <Compile Include="CrpReader.cs" />
-    <Compile Include="Consts.cs" />
+    <Compile Include="Options.cs" />
+    <Compile Include="Parsers\GameObjectParser.cs" />
+    <Compile Include="Utils\Consts.cs" />
     <Compile Include="CrpDeserializer.cs" />
-    <Compile Include="GameTypes.cs" />
-    <Compile Include="CrpHeader.cs" />
+    <Compile Include="Models\GameTypes.cs" />
+    <Compile Include="Models\CrpHeader.cs" />
     <Compile Include="AssetParser.cs" />
     <Compile Include="Parsers\ImgParser.cs" />
     <Compile Include="Parsers\InfoGenParser.cs" />
@@ -79,7 +80,7 @@
     <Compile Include="Parsers\MeshParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CryptoUtils.cs" />
+    <Compile Include="Utils\CryptoUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

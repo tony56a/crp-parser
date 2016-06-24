@@ -18,6 +18,11 @@ namespace ConsoleApplication1
             this.y = y;
             this.z = z;
         }
+
+        public override string ToString()
+        {
+            return string.Format("X:{0} Y:{0} Z:{0}\n", x, y, z);
+        }
     }
 
     public class Vector2
@@ -29,6 +34,11 @@ namespace ConsoleApplication1
         {
             this.x = x;
             this.y = y;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("X:{0} Y:{0}\n", x, y);
         }
     }
 
@@ -48,6 +58,22 @@ namespace ConsoleApplication1
         }
     }
 
+    public class Color
+    {
+        public float r;
+        public float g;
+        public float b;
+        public float a;
+
+        public Color(float r, float g, float b, float a)
+        {
+            this.r = r;
+            this.b = g;
+            this.g = b;
+            this.a = a;
+        }
+    }
+
     public class Matrix4x4
     {
         public float[] entries = new float[16];
@@ -57,6 +83,13 @@ namespace ConsoleApplication1
     {
         public int[] indicies = new int[4];
         public float[] weights = new float[4];
+    }
+
+    public class Transform
+    {
+        public Vector3 position;
+        public Vector4 rotation;
+        public Vector3 scale;
     }
 
     public class Mesh

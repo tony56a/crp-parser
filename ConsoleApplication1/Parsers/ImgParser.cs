@@ -9,22 +9,36 @@ namespace ConsoleApplication1.Parsers
 {
     public static class ImgParser
     {
-        public static MagickImage parseImage(CrpReader reader, bool saveFile, string saveFileName,long fileSize)
+        public static MagickImage parseImage(CrpReader reader, bool saveFile, string saveFileName, long fileSize, bool verbose)
         {
             bool forceLinearFlag = reader.ReadBoolean();
             uint imgLength = reader.ReadUInt32();
             MagickImage retVal = new MagickImage(reader.ReadBytes((int)imgLength));
-            if (saveFile)
+            if (retVal.Format == MagickFormat.Png)
             {
-                if ( retVal.Format == MagickFormat.Png)
+                string fileName = saveFileName + ".png";
+                if (verbose)
                 {
-                    retVal.Write(saveFileName + ".png");
+                    Console.WriteLine("Read image file {0}", fileName);
                 }
-                else if ( retVal.Format == MagickFormat.Dds)
+                if (saveFile)
                 {
-                    retVal.Write(saveFileName + ".dds");
+                    retVal.Write(fileName);
                 }
             }
+            else if (retVal.Format == MagickFormat.Dds)
+            {
+                string fileName = saveFileName + ".dds";
+                if (verbose)
+                {
+                    Console.WriteLine("Read image file {0}", fileName);
+                }
+                if (saveFile)
+                {
+                    retVal.Write(fileName);
+                }
+            }
+            
             return retVal;
         }
 
