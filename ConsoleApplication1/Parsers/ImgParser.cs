@@ -14,30 +14,19 @@ namespace ConsoleApplication1.Parsers
             bool forceLinearFlag = reader.ReadBoolean();
             uint imgLength = reader.ReadUInt32();
             MagickImage retVal = new MagickImage(reader.ReadBytes((int)imgLength));
-            if (retVal.Format == MagickFormat.Png)
+
+            string fileName = saveFileName + ".png";
+            retVal.Format = MagickFormat.Png;
+
+            if (verbose)
             {
-                string fileName = saveFileName + ".png";
-                if (verbose)
-                {
-                    Console.WriteLine("Read image file {0}", fileName);
-                }
-                if (saveFile)
-                {
-                    retVal.Write(fileName);
-                }
+                Console.WriteLine("Read image file {0}", fileName);
             }
-            else if (retVal.Format == MagickFormat.Dds)
+            if (saveFile)
             {
-                string fileName = saveFileName + ".dds";
-                if (verbose)
-                {
-                    Console.WriteLine("Read image file {0}", fileName);
-                }
-                if (saveFile)
-                {
-                    retVal.Write(fileName);
-                }
+                retVal.Write(fileName);
             }
+            
             
             return retVal;
         }

@@ -1,4 +1,5 @@
 ﻿using CrpParser;
+using CrpParser.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -70,7 +71,15 @@ namespace ConsoleApplication1
             CrpHeader output = new CrpHeader();
             output.formatVersion = reader.ReadUInt16();
             output.packageName = reader.ReadString();
-            output.authorName = CryptoUtils.Decrypt(reader.ReadString());
+            string encryptedAuthor = reader.ReadString();
+            if (encryptedAuthor.Length > 0)
+            {
+                output.authorName = CryptoUtils.Decrypt(encryptedAuthor);
+            }
+            else
+            {
+                output.authorName = "Unknown";
+            }
             output.pkgVersion = reader.ReadUInt32();
             output.mainAssetName = reader.ReadString();
             output.numAssets = reader.ReadInt32();
@@ -104,7 +113,7 @@ namespace ConsoleApplication1
                 string assetName = reader.ReadString();
                 assetContentLen -= (1 + assetName.Length);
 
-                string fileName = string.Format("{0}_{1}_{2}", assetName, index, header.assets[index].assetType.ToString());
+                string fileName = string.Format("{0}_{1}_{2}", StrUtils.limitStr(assetName), index, header.assets[index].assetType.ToString());
                 assetParser.parseObject((int)assetContentLen, assetType, saveFiles, fileName, isVerbose);
             }
 
