@@ -1,4 +1,5 @@
 ﻿using CrpParser;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,10 +46,17 @@ namespace ConsoleApplication1
                 {
                     Console.WriteLine(header);
                 }
+                if (options.SaveFiles)
+                {
+                    StreamWriter file = new StreamWriter(new FileStream(header.mainAssetName + "_header.json", FileMode.Create));
+                    string json = JsonConvert.SerializeObject(header, Formatting.Indented, new Newtonsoft.Json.Converters.StringEnumConverter());
+                    file.Write(json);
+                    file.Close();
+                }
 
                 for (int i = 0; i < header.numAssets; i++)
                 {
-                    parseAssets(header, i,options.SaveFiles,options.Verbose);
+                    parseAssets(header, i, options.SaveFiles, options.Verbose);
                 }
             }
             else
@@ -69,7 +77,7 @@ namespace ConsoleApplication1
             output.contentBeginIndex = reader.ReadInt64();
 
             output.assets = new List<CrpAssetInfoHeader>();
-            for(int i = 0; i<output.numAssets; i++)
+            for (int i = 0; i < output.numAssets; i++)
             {
                 CrpAssetInfoHeader info = new CrpAssetInfoHeader();
                 info.assetName = reader.ReadString();
@@ -80,13 +88,13 @@ namespace ConsoleApplication1
                 output.assets.Add(info);
 
             }
-            
+
             return output;
         }
 
-        private void parseAssets(CrpHeader header,int index,bool saveFiles,bool isVerbose)
+        private void parseAssets(CrpHeader header, int index, bool saveFiles, bool isVerbose)
         {
-            
+
             bool isNullFlag = reader.ReadBoolean();
             if (!isNullFlag)
             {
@@ -96,10 +104,10 @@ namespace ConsoleApplication1
                 string assetName = reader.ReadString();
                 assetContentLen -= (1 + assetName.Length);
 
-                string fileName = string.Format("{0}_{1}_{2}", assetName, index,header.assets[index].assetType.ToString());
+                string fileName = string.Format("{0}_{1}_{2}", assetName, index, header.assets[index].assetType.ToString());
                 assetParser.parseObject((int)assetContentLen, assetType, saveFiles, fileName, isVerbose);
             }
- 
+
         }
 
     }
