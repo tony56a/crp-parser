@@ -61,7 +61,7 @@ namespace ConsoleApplication1
             };
             singlarObjParser["UnityEngine.Color"] = () =>
             {
-                return new Vector4(this.ReadSingle(), this.ReadSingle(), this.ReadSingle(), this.ReadSingle());
+                return new Color(this.ReadSingle(), this.ReadSingle(), this.ReadSingle(), this.ReadSingle());
             };
             singlarObjParser["UnityEngine.BoneWeight"] = () =>
             {

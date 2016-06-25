@@ -96,7 +96,7 @@ namespace ConsoleApplication1
     {
         public Matrix4x4[] bindPoses;
         public Boneweight[] boneWeights;
-        public Vector4[] colors;
+        public Color[] colors;
         public Vector3[] normals;
         public int subMeshCount;
         public Vector4[] tangents;
@@ -159,7 +159,7 @@ namespace ConsoleApplication1
     {
         public string shaderName;
         public int numProperties;
-        public Dictionary<string, Vector4> colors = new Dictionary<string, Vector4>();
+        public Dictionary<string, Color> colors = new Dictionary<string, Color>();
         public Dictionary<string, Vector4> vectors = new Dictionary<string, Vector4>();
         public Dictionary<string, float> floats = new Dictionary<string, float>();
         public Dictionary<string, string> textures = new Dictionary<string, string>();
