@@ -19,9 +19,10 @@ namespace ConsoleApplication1
         {
             var options = new Options();
 #if DEBUG
-            
-             CrpDeserializer deserializer = new CrpDeserializer("D:\\Dropbox\\dropbox\\csfileformat\\uk_sign.crp");
-             deserializer.parseFile();
+            options.Verbose = false;
+            options.SaveFiles = true;
+            CrpDeserializer deserializer = new CrpDeserializer("D:\\Dropbox\\dropbox\\csfileformat\\Ford Explorer Interceptor SUV.crp");
+             deserializer.parseFile(options);
 #else
             if (args.Length == 1)
             {

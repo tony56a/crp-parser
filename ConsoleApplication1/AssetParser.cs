@@ -29,8 +29,7 @@ namespace ConsoleApplication1
             this.parsers["CustomAssetMetaData"] = InfoGenParser.parseInfoGen;
             this.parsers["UnityEngine.Material"] = MaterialParser.parseMaterial;
 
-            //TODO:There are quite a few types that need to be parsed here
-            //this.parsers["UnityEngine.GameObject"] = GameObjectParser.parseGameObj;
+            this.parsers["UnityEngine.GameObject"] = GameObjectParser.parseGameObj;
 
         }
 

@@ -10,7 +10,7 @@ namespace ConsoleApplication1.Parsers
 {
     class GameObjectParser
     {
-        public static Dictionary<string, dynamic> parseGameObj(CrpReader reader, bool saveFile, string saveFileName, long fileSize)
+        public static Dictionary<string, dynamic> parseGameObj(CrpReader reader, bool saveFile, string saveFileName, long fileSize, bool verbose)
         {
             Dictionary<string, dynamic> retVal = new Dictionary<string, dynamic>();
 
@@ -30,15 +30,17 @@ namespace ConsoleApplication1.Parsers
                     string assemblyQualifiedName = reader.ReadString();
                     string propertyType = assemblyQualifiedName.Split(new char[] { ',' })[0];
                     string propertyName = i + "_" + propertyType;
-                    if (propertyType.Contains("[]"))
-                    {
-                        retVal[propertyName] = reader.readUnityArray(propertyType);
-                    }
-                    else
-                    {
-                        retVal[propertyName] = reader.readUnityObj(propertyType);
-                    }
-
+                    
+                        if (propertyType.Contains("[]"))
+                        {
+                            retVal[propertyName] = reader.readUnityArray(propertyType);
+                        }
+                        else
+                        {
+                            retVal[propertyName] = reader.readUnityObj(propertyType);
+                        }
+                  
+                  
                 }
             }
 
@@ -47,15 +49,17 @@ namespace ConsoleApplication1.Parsers
                 int bytesToRead = (int)(fileSize - (reader.BaseStream.Position - fileContentBegin));
                 reader.ReadBytes(bytesToRead);
             }
+            string json = JsonConvert.SerializeObject(retVal, Formatting.Indented, new Newtonsoft.Json.Converters.StringEnumConverter());
+            if (verbose)
+            {
+                Console.WriteLine(json);
+            }
+
             if (saveFile)
             {
-                if (saveFile)
-                {
-                    string json = JsonConvert.SerializeObject(retVal, Formatting.Indented, new Newtonsoft.Json.Converters.StringEnumConverter());
-                    StreamWriter file = new StreamWriter(new FileStream(saveFileName + ".json", FileMode.Create));
-                    file.Write(json);
-                    file.Close();
-                }
+                StreamWriter file = new StreamWriter(new FileStream(saveFileName + ".json", FileMode.Create));
+                file.Write(json);
+                file.Close();
             }
 
             return retVal;
