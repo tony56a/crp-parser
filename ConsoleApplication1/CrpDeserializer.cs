@@ -1,5 +1,7 @@
-﻿using CrpParser;
+﻿using ConsoleApplication1.Parsers;
+using CrpParser;
 using CrpParser.Utils;
+using ImageMagick;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -54,10 +56,16 @@ namespace ConsoleApplication1
                     file.Write(json);
                     file.Close();
                 }
-
-                for (int i = 0; i < header.numAssets; i++)
+                if (header.isLut)
                 {
-                    parseAssets(header, i, options.SaveFiles, options.Verbose);
+                    parseLut(header, options.SaveFiles, options.Verbose);
+                }
+                else
+                {
+                    for (int i = 0; i < header.numAssets; i++)
+                    {
+                        parseAssets(header, i, options.SaveFiles, options.Verbose);
+                    }
                 }
             }
             else
@@ -92,6 +100,10 @@ namespace ConsoleApplication1
                 info.assetName = reader.ReadString();
                 info.assetChecksum = reader.ReadString();
                 info.assetType = (Consts.AssetTypeMapping)(reader.ReadInt32());
+                if(info.assetType == Consts.AssetTypeMapping.userLut)
+                {
+                    output.isLut = true;
+                }
                 info.assetOffsetBegin = reader.ReadInt64();
                 info.assetSize = reader.ReadInt64();
                 output.assets.Add(info);
@@ -99,6 +111,38 @@ namespace ConsoleApplication1
             }
 
             return output;
+        }
+
+        /// <summary>
+        /// Special Parser for LUTs, we're only grabbing the headerless PNG file (for now)
+        /// </summary>
+        /// <param name="header"></param>
+        /// <param name="saveFiles"></param>
+        /// <param name="isVerbose"></param>
+        private void parseLut(CrpHeader header, bool saveFiles, bool isVerbose)
+        {
+            //Find the first instance of data(PNG file)
+            CrpAssetInfoHeader info = header.assets.Find(asset => asset.assetName.Contains(Consts.DATA_EXTENSION));
+
+            //Generate a name for the file
+            string fileName = string.Format("{0}_{1}.png", StrUtils.limitStr(info.assetName), info.assetType.ToString());
+
+            //Should be unnessecary in current version(stream pointer should already be at start of file),
+            //but advance stream pointer to file position
+            reader.BaseStream.Seek(info.assetOffsetBegin, SeekOrigin.Current);
+
+            //Read file and deal with it as apporiate.
+            MagickImage retVal = ImgParser.parseImgFile(reader, (uint)info.assetSize);
+            if (isVerbose)
+            {
+                Console.WriteLine("Read image file {0}", fileName);
+            }
+            if (saveFiles)
+            {
+                retVal.Write(fileName);
+            }
+
+
         }
 
         private void parseAssets(CrpHeader header, int index, bool saveFiles, bool isVerbose)
@@ -115,8 +159,7 @@ namespace ConsoleApplication1
 
                 string fileName = string.Format("{0}_{1}_{2}", StrUtils.limitStr(assetName), index, header.assets[index].assetType.ToString());
                 assetParser.parseObject((int)assetContentLen, assetType, saveFiles, fileName, isVerbose);
-            }
-
+            } 
         }
 
     }

@@ -13,11 +13,10 @@ namespace ConsoleApplication1.Parsers
         {
             bool forceLinearFlag = reader.ReadBoolean();
             uint imgLength = reader.ReadUInt32();
-            MagickImage retVal = new MagickImage(reader.ReadBytes((int)imgLength));
+            MagickImage retVal = parseImgFile(reader, imgLength);
 
             string fileName = saveFileName + ".png";
-            retVal.Format = MagickFormat.Png;
-
+            
             if (verbose)
             {
                 Console.WriteLine("Read image file {0}", fileName);
@@ -28,6 +27,13 @@ namespace ConsoleApplication1.Parsers
             }
             
             
+            return retVal;
+        }
+
+        public static MagickImage parseImgFile(CrpReader reader, uint fileSize)
+        {
+            MagickImage retVal = new MagickImage(reader.ReadBytes((int)fileSize));
+            retVal.Format = MagickFormat.Png;
             return retVal;
         }
 

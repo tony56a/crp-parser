@@ -9,7 +9,7 @@ namespace ConsoleApplication1
     public class Consts
     {
         public static readonly string MAGICSTR = "CRAP";
-
+        public static readonly string DATA_EXTENSION = "_Data";
         public enum AssetTypeMapping {
             unknown,
             obj,

@@ -21,7 +21,7 @@ namespace ConsoleApplication1
 #if DEBUG
             options.Verbose = false;
             options.SaveFiles = true;
-            CrpDeserializer deserializer = new CrpDeserializer("D:\\Dropbox\\dropbox\\csfileformat\\Ford Explorer Interceptor SUV.crp");
+            CrpDeserializer deserializer = new CrpDeserializer("C:\\Program Files (x86)\\Steam\\steamapps\\workshop\\content\\255710\\721098648\\San Minato LUT V1.3.crp");
              deserializer.parseFile(options);
 #else
             if (args.Length == 1)

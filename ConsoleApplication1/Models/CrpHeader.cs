@@ -15,6 +15,7 @@ namespace ConsoleApplication1
         public string mainAssetName;
         public int numAssets;
         public long contentBeginIndex;
+        public bool isLut;
         public List<CrpAssetInfoHeader> assets;
 
         public override string ToString()
