@@ -125,7 +125,7 @@ namespace ConsoleApplication1
             CrpAssetInfoHeader info = header.assets.Find(asset => asset.assetName.Contains(Consts.DATA_EXTENSION));
 
             //Generate a name for the file
-            string fileName = string.Format("{0}_{1}.png", StrUtils.limitStr(info.assetName), info.assetType.ToString());
+            string fileName = string.Format("{0}.png", StrUtils.limitStr(info.assetName), info.assetType.ToString());
 
             //Should be unnessecary in current version(stream pointer should already be at start of file),
             //but advance stream pointer to file position
