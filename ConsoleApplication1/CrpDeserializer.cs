@@ -6,14 +6,10 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleApplication1
 {
-    public class CrpDeserializer
+	public class CrpDeserializer
     {
         public string filePath;
         private FileStream stream;
@@ -21,15 +17,16 @@ namespace ConsoleApplication1
         private AssetParser assetParser;
         private Dictionary<string, int> typeRefCount = new Dictionary<string, int>();
 
-        public CrpDeserializer(string filePath)
+		/// <summary>
+		/// Initializes the object by opening the specified CRP file. Note and be prepared to handle the exceptions
+		/// that may be thrown.
+		/// </summary>
+		/// <param name="filePath">Path to the CRP file that needs to be opened.</param>
+		/// <exception cref="System.IO.IOException">Thrown if i.e the filePath parameter is incorrect, file is missing,
+		/// in use, etc.</exception>
+		public CrpDeserializer(string filePath)
         {
-			try { stream = File.Open(filePath, FileMode.Open); }
-			catch (IOException exception)
-			{
-				Console.WriteLine("An error was encountered while trying to open the file specified: " + exception.Message);
-				Console.ReadKey();
-				Environment.Exit(-1);
-			}
+			stream = File.Open(filePath, FileMode.Open);
             reader = new CrpReader(stream);
             assetParser = new AssetParser(reader);
         }
