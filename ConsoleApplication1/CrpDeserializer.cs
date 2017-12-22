@@ -23,7 +23,13 @@ namespace ConsoleApplication1
 
         public CrpDeserializer(string filePath)
         {
-            stream = File.Open(filePath, FileMode.Open);
+			try { stream = File.Open(filePath, FileMode.Open); }
+			catch (IOException exception)
+			{
+				Console.WriteLine("An error was encountered while trying to open the file specified: " + exception.Message);
+				Console.ReadKey();
+				Environment.Exit(-1);
+			}
             reader = new CrpReader(stream);
             assetParser = new AssetParser(reader);
         }
