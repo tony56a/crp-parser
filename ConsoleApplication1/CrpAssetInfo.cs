@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ConsoleApplication1
+﻿namespace ConsoleApplication1
 {
-    class CrpAssetInfo
-    {
-        object obj;
-        string assetType;
+    //class CrpAssetInfo
+    //{
+    //    readonly System.Object obj;
+    //    readonly System.String assetType;
 
 
-    }
+    //}
 }

@@ -1,25 +1,23 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleApplication1.Parsers
 {
     class MaterialParser
     {
-        public static MaterialStub parseMaterial(CrpReader reader, bool saveFile, string saveFileName,long fileSize,bool verbose)
+        public static MaterialStub ParseMaterial(CrpReader reader, Boolean saveFile, String saveFileName, Int64 fileSize, Boolean verbose)
         {
-            long fileContentBegin = reader.BaseStream.Position;
-            MaterialStub retVal = new MaterialStub();
-            retVal.shaderName = reader.ReadString();
-            retVal.numProperties = reader.ReadInt32();
-            for(int i =0; i< retVal.numProperties; i++)
+            var fileContentBegin = reader.BaseStream.Position;
+            var retVal = new MaterialStub
             {
-                int propertyType = reader.ReadInt32();
-                string propertyName = reader.ReadString();
+                shaderName = reader.ReadString(),
+                numProperties = reader.ReadInt32()
+            };
+            for (var i = 0; i < retVal.numProperties; i++)
+            {
+                var propertyType = reader.ReadInt32();
+                var propertyName = reader.ReadString();
                 switch (propertyType)
                 {
                     case 0:
@@ -32,11 +30,12 @@ namespace ConsoleApplication1.Parsers
                         retVal.floats[propertyName] = reader.ReadSingle();
                         break;
                     case 3:
-                        bool isNull = reader.ReadBoolean();
+                        var isNull = reader.ReadBoolean();
                         if (!isNull)
                         {
                             retVal.textures[propertyName] = reader.ReadString();
-                        }else
+                        }
+                        else
                         {
                             retVal.textures[propertyName] = "";
                         }
@@ -44,23 +43,23 @@ namespace ConsoleApplication1.Parsers
                 }
             }
 
-            if((reader.BaseStream.Position-fileContentBegin) != fileSize)
+            if ((reader.BaseStream.Position - fileContentBegin) != fileSize)
             {
-                int bytesToRead = (int)(fileSize - (reader.BaseStream.Position - fileContentBegin));
+                var bytesToRead = (Int32)(fileSize - (reader.BaseStream.Position - fileContentBegin));
                 reader.ReadBytes(bytesToRead);
             }
-            string fileName = saveFileName + ".json";
-            string json = JsonConvert.SerializeObject(retVal, Formatting.Indented);
-            if(verbose)
+            var fileName = saveFileName + ".json";
+            var json = JsonConvert.SerializeObject(retVal, Formatting.Indented);
+            if (verbose)
             {
                 Console.WriteLine("Read info file {0}", fileName);
                 Console.WriteLine(json);
             }
             if (saveFile)
             {
-                StreamWriter file = new StreamWriter(new FileStream(saveFileName + ".json", FileMode.Create));
+                using var stream = new FileStream(saveFileName + ".json", FileMode.Create);
+                var file = new StreamWriter(stream);
                 file.Write(json);
-                file.Close();
             }
 
             return retVal;

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConsoleApplication1": {
+      "commandName": "Project",
+      "commandLineArgs": "--file \"C:\\Users\\luigi.trabacchin\\AppData\\Local\\Colossal Order\\Cities_Skylines\\Addons\\Assets\\Subterrean Metro 4XByPass.crp\" --verbose --savecontent"
+    }
+  }
+}

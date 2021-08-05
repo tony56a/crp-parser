@@ -1,26 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleApplication1
 {
     public class CrpHeader
     {
-        public ushort formatVersion;
-        public string packageName;
-        public string authorName;
-        public uint pkgVersion;
-        public string mainAssetName;
-        public int numAssets;
-        public long contentBeginIndex;
-        public bool isLut;
+        public System.UInt16 formatVersion;
+        public System.String packageName;
+        public System.String authorName;
+        public System.UInt32 pkgVersion;
+        public System.String mainAssetName;
+        public System.Int32 numAssets;
+        public System.Int64 contentBeginIndex;
+        public System.Boolean isLut;
         public List<CrpAssetInfoHeader> assets;
 
-        public override string ToString()
+        public override System.String ToString()
         {
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             if (packageName != null)
             {
                 builder.AppendFormat("Package Name:{0}\n", packageName);
@@ -40,7 +37,7 @@ namespace ConsoleApplication1
             builder.AppendFormat("# of Assets:{0}\n", numAssets);
             if (assets != null)
             {
-                foreach(CrpAssetInfoHeader info in assets)
+                foreach (var info in assets)
                 {
                     builder.AppendLine();
                     builder.Append(info);

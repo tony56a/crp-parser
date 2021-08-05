@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace ConsoleApplication1
 {
     public class CrpAssetInfoHeader
     {
-        public string assetName;
-        public string assetChecksum;
+        public System.String assetName;
+        public System.String assetChecksum;
         public Consts.AssetTypeMapping assetType;
-        public long assetOffsetBegin;
-        public long assetSize;
+        public System.Int64 assetOffsetBegin;
+        public System.Int64 assetSize;
 
-        public override string ToString()
+        public override System.String ToString()
         {
 
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             if (assetName != null)
             {
                 builder.AppendFormat("Asset Name:{0}\n", assetName);
@@ -31,6 +27,6 @@ namespace ConsoleApplication1
             builder.AppendFormat("Asset Size:{0}\n", assetSize);
 
             return builder.ToString();
-        }        
+        }
     }
 }
