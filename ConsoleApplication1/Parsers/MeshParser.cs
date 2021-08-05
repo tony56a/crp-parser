@@ -1,48 +1,48 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleApplication1.Parsers
 {
     class MeshParser
     {
-        public static Mesh parseMesh(CrpReader reader, bool saveFile, string saveFileName, long fileSize, bool verbose)
+        public static Mesh ParseMesh(CrpReader reader, Boolean saveFile, String saveFileName, Int64 fileSize, Boolean verbose)
         {
-            long fileContentBegin = reader.BaseStream.Position;
+            var fileContentBegin = reader.BaseStream.Position;
 
-            Mesh retVal = new Mesh();
-            retVal.vertices = reader.readUnityArray("UnityEngine.Vector3");
-            retVal.colors = reader.readUnityArray("UnityEngine.Color");
-            retVal.uv = reader.readUnityArray("UnityEngine.Vector2");
-            retVal.normals = reader.readUnityArray("UnityEngine.Vector3");
-            retVal.tangents = reader.readUnityArray("UnityEngine.Vector4");
-            retVal.boneWeights = reader.readUnityArray("UnityEngine.BoneWeight");
-            retVal.bindPoses = reader.readUnityArray("UnityEngine.Matrix4x4");
-            retVal.subMeshCount = reader.ReadInt32();
-            for (int i = 0; i < retVal.subMeshCount; i++)
+            var retVal = new Mesh
             {
-                int[] triangles = reader.readUnityArray("System.Int32");
+                vertices = reader.readUnityArray("UnityEngine.Vector3"),
+                colors = reader.readUnityArray("UnityEngine.Color"),
+                uv = reader.readUnityArray("UnityEngine.Vector2"),
+                normals = reader.readUnityArray("UnityEngine.Vector3"),
+                tangents = reader.readUnityArray("UnityEngine.Vector4"),
+                boneWeights = reader.readUnityArray("UnityEngine.BoneWeight"),
+                bindPoses = reader.readUnityArray("UnityEngine.Matrix4x4"),
+                subMeshCount = reader.ReadInt32()
+            };
+            for (var i = 0; i < retVal.subMeshCount; i++)
+            {
+                Int32[] triangles = reader.readUnityArray("System.Int32");
                 retVal.triangles.AddRange(triangles);
             }
 
             if ((reader.BaseStream.Position - fileContentBegin) != fileSize)
             {
-                int bytesToRead = (int)(fileSize - (reader.BaseStream.Position - fileContentBegin));
+                var bytesToRead = (Int32)(fileSize - (reader.BaseStream.Position - fileContentBegin));
                 reader.ReadBytes(bytesToRead);
             }
-            string fileName = saveFileName + ".obj";
+            var fileName = saveFileName + ".obj";
             if (verbose)
             {
                 Console.WriteLine("Read {0} bytes into image file {1}", (reader.BaseStream.Position - fileContentBegin), fileName);
             }
             if (saveFile)
             {
-                StreamWriter file = new StreamWriter(new FileStream(fileName, FileMode.Create));
-                file.Write(retVal.exportObj());
-                file.Close();
+                using (var stream = new FileStream(fileName, FileMode.Create))
+                {
+                    var file = new StreamWriter(stream);
+                    file.Write(retVal.ExportObj());
+                }
             }
             return retVal;
         }

@@ -1,55 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
 
 namespace ConsoleApplication1
 {
-
     public class Vector3
     {
-        public float x;
-        public float y;
-        public float z;
+        public System.Single x;
+        public System.Single y;
+        public System.Single z;
 
-        public Vector3(float x, float y, float z)
+        public Vector3(System.Single x, System.Single y, System.Single z)
         {
             this.x = x;
             this.y = y;
             this.z = z;
         }
 
-        public override string ToString()
-        {
-            return string.Format("X:{0} Y:{0} Z:{0}\n", x, y, z);
-        }
+        public override System.String ToString() => $"X:{x} Y:{x} Z:{x}\n";
     }
 
     public class Vector2
     {
-        public float x;
-        public float y;
+        public System.Single x;
+        public System.Single y;
 
-        public Vector2(float x, float y)
+        public Vector2(System.Single x, System.Single y)
         {
             this.x = x;
             this.y = y;
         }
 
-        public override string ToString()
-        {
-            return string.Format("X:{0} Y:{0}\n", x, y);
-        }
+        public override System.String ToString() => $"X:{x} Y:{x}\n";
     }
 
     public class Vector4
     {
-        public float x;
-        public float y;
-        public float z;
-        public float w;
+        public System.Single x;
+        public System.Single y;
+        public System.Single z;
+        public System.Single w;
 
-        public Vector4(float x, float y, float z, float w)
+        public Vector4(System.Single x, System.Single y, System.Single z, System.Single w)
         {
             this.x = x;
             this.y = y;
@@ -60,12 +51,12 @@ namespace ConsoleApplication1
 
     public class Color
     {
-        public float r;
-        public float g;
-        public float b;
-        public float a;
+        public System.Single r;
+        public System.Single g;
+        public System.Single b;
+        public System.Single a;
 
-        public Color(float r, float g, float b, float a)
+        public Color(System.Single r, System.Single g, System.Single b, System.Single a)
         {
             this.r = r;
             this.b = g;
@@ -76,13 +67,13 @@ namespace ConsoleApplication1
 
     public class Matrix4x4
     {
-        public float[] entries = new float[16];
+        public System.Single[] entries = new System.Single[16];
     }
 
     public class Boneweight
     {
-        public int[] indicies = new int[4];
-        public float[] weights = new float[4];
+        public System.Int32[] indicies = new System.Int32[4];
+        public System.Single[] weights = new System.Single[4];
     }
 
     public class Transform
@@ -98,71 +89,68 @@ namespace ConsoleApplication1
         public Boneweight[] boneWeights;
         public Color[] colors;
         public Vector3[] normals;
-        public int subMeshCount;
+        public System.Int32 subMeshCount;
         public Vector4[] tangents;
-        public List<int> triangles= new List<int>();
+        public List<System.Int32> triangles = new();
         public Vector2[] uv;
         public Vector3[] vertices;
 
         //Taken from:http://wiki.unity3d.com/index.php?title=ObjExporter
-        public string exportObj()
+        public System.String ExportObj()
         {
-            StringBuilder sb = new StringBuilder();
-            if(vertices != null)
+            var sb = new StringBuilder();
+            if (vertices != null)
             {
-                foreach (Vector3 v in vertices)
+                foreach (var v in vertices)
                 {
-                    sb.Append(string.Format("v {0:0.000000000} {1:0.000000000} {2:0.000000000}\n", v.x, v.y, v.z));
+                    sb.Append($"v {v.x:0.000000000} {v.y:0.000000000} {v.z:0.000000000}\n");
                 }
             }
-            
-            sb.Append("\n");
-            if(normals != null)
+
+            sb.Append('\n');
+            if (normals != null)
             {
-                foreach (Vector3 v in normals)
+                foreach (var v in normals)
                 {
-                    sb.Append(string.Format("vn {0:0.000000000} {1:0.000000000} {2:0.000000000}\n", v.x, v.y, v.z));
+                    sb.Append($"vn {v.x:0.000000000} {v.y:0.000000000} {v.z:0.000000000}\n");
                 }
             }
-           
-            sb.Append("\n");
-            if( uv != null)
+
+            sb.Append('\n');
+            if (uv != null)
             {
-                foreach (Vector2 v in uv)
+                foreach (var v in uv)
                 {
-                    sb.Append(string.Format("vt {0:0.000000000} {1:0.000000000}\n", v.x, v.y));
+                    sb.Append($"vt {v.x:0.000000000} {v.y:0.000000000}\n");
                 }
             }
 
             if (subMeshCount != 0)
             {
-                for (int i = 0; i < subMeshCount; i++)
+                for (var i = 0; i < subMeshCount; i++)
                 {
-                    sb.Append(string.Format("g {0}", i));
-                    sb.Append("\n");
+                    sb.Append($"g {i}");
+                    sb.Append('\n');
 
-                    for (int j = 0; j < triangles.Count; j += 3)
+                    for (var j = 0; j < triangles.Count; j += 3)
                     {
-
-
-                        sb.Append(string.Format("f {0}/{0}/{0} {1}/{1}/{1} {2}/{2}/{2}\n",
-                            triangles[j] + 1, triangles[j + 1] + 1, triangles[j + 2] + 1));
+                        sb.Append($"f {triangles[j] + 1}/{triangles[j] + 1}/{triangles[j] + 1} {triangles[j + 1] + 1}/{triangles[j + 1] + 1}/{triangles[j + 1] + 1} {triangles[j + 2] + 1}/{triangles[j + 2] + 1}/{triangles[j + 2] + 1}\n");
                     }
                 }
             }
-           
+
             return sb.ToString();
         }
     }
 
     public class MaterialStub
     {
-        public string shaderName;
-        public int numProperties;
-        public Dictionary<string, Color> colors = new Dictionary<string, Color>();
-        public Dictionary<string, Vector4> vectors = new Dictionary<string, Vector4>();
-        public Dictionary<string, float> floats = new Dictionary<string, float>();
-        public Dictionary<string, string> textures = new Dictionary<string, string>();
+        public System.String shaderName;
+        public System.Int32 numProperties;
+        public Dictionary<System.String, Color> colors = new();
+        public Dictionary<System.String, Vector4> vectors = new();
+        public Dictionary<System.String, System.Single> floats = new();
+        public Dictionary<System.String, System.String> textures = new();
 
     }
 

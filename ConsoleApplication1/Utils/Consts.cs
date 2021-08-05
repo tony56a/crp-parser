@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ConsoleApplication1
+﻿namespace ConsoleApplication1
 {
     public class Consts
     {
-        public static readonly string MAGICSTR = "CRAP";
-        public static readonly string DATA_EXTENSION = "_Data";
-        public enum AssetTypeMapping {
+        public static readonly System.String MAGICSTR = "CRAP";
+        public static readonly System.String DATA_EXTENSION = "_Data";
+        public enum AssetTypeMapping
+        {
             unknown,
             obj,
             material,

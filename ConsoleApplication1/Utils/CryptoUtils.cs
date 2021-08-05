@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleApplication1
 {
     class CryptoUtils
     {
-        private static readonly byte[] AESKEY = new byte[32]
+        private static readonly Byte[] AESKEY = new Byte[32]
          {
             13,
             27,
@@ -45,7 +42,7 @@ namespace ConsoleApplication1
             59,
             209
          };
-        private static readonly byte[] VECTOR = new byte[16]
+        private static readonly Byte[] VECTOR = new Byte[16]
         {
             81,
             101,
@@ -65,15 +62,15 @@ namespace ConsoleApplication1
             56
         };
 
-        public static string Decrypt(string encrypted)
+        public static String Decrypt(String encrypted)
         {
-            RijndaelManaged rijndaelManaged = new RijndaelManaged();
-            ICryptoTransform decryptor = rijndaelManaged.CreateDecryptor(CryptoUtils.AESKEY,CryptoUtils.VECTOR);
-            UTF8Encoding encoder = new UTF8Encoding();
-            byte[] encryptedString = Convert.FromBase64String(encrypted);
+            var rijndaelManaged = new RijndaelManaged();
+            var decryptor = rijndaelManaged.CreateDecryptor(CryptoUtils.AESKEY, CryptoUtils.VECTOR);
+            var encoder = new UTF8Encoding();
+            var encryptedString = Convert.FromBase64String(encrypted);
 
-            MemoryStream memoryStream = new MemoryStream();
-            using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, decryptor, CryptoStreamMode.Write))
+            var memoryStream = new MemoryStream();
+            using (var cryptoStream = new CryptoStream((Stream)memoryStream, decryptor, CryptoStreamMode.Write))
             {
                 cryptoStream.Write(encryptedString, 0, encryptedString.Length);
             }

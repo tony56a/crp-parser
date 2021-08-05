@@ -2,29 +2,26 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleApplication1.Parsers
 {
     public class InfoGenParser
     {
-        public static Dictionary<string, dynamic> parseInfoGen(CrpReader reader, bool saveFile, string saveFileName, long fileSize, bool verbose)
+        public static Dictionary<String, dynamic> ParseInfoGen(CrpReader reader, Boolean saveFile, String saveFileName, Int64 fileSize, Boolean verbose)
         {
-            Dictionary<string, dynamic> retVal = new Dictionary<string, dynamic>();
+            var retVal = new Dictionary<String, dynamic>();
 
-            long fileContentBegin = reader.BaseStream.Position;
+            var fileContentBegin = reader.BaseStream.Position;
 
-            int numProperties = reader.ReadInt32();
-            for (int i = 0; i < numProperties; i++)
+            var numProperties = reader.ReadInt32();
+            for (var i = 0; i < numProperties; i++)
             {
-                bool isNull = reader.ReadBoolean();
+                var isNull = reader.ReadBoolean();
                 if (!isNull)
                 {
-                    string assemblyQualifiedName = reader.ReadString();
-                    string propertyType = assemblyQualifiedName.Split(new char[] { ',' })[0];
-                    string propertyName = reader.ReadString();
+                    var assemblyQualifiedName = reader.ReadString();
+                    var propertyType = assemblyQualifiedName.Split(new Char[] { ',' })[0];
+                    var propertyName = reader.ReadString();
                     if (propertyType.Contains("[]"))
                     {
                         retVal[propertyName] = reader.readUnityArray(propertyType);
@@ -39,11 +36,11 @@ namespace ConsoleApplication1.Parsers
 
             if ((reader.BaseStream.Position - fileContentBegin) != fileSize)
             {
-                int bytesToRead = (int)(fileSize - (reader.BaseStream.Position - fileContentBegin));
+                var bytesToRead = (Int32)(fileSize - (reader.BaseStream.Position - fileContentBegin));
                 reader.ReadBytes(bytesToRead);
             }
-            string json = JsonConvert.SerializeObject(retVal, Formatting.Indented, new Newtonsoft.Json.Converters.StringEnumConverter());
-            string fileName = saveFileName + ".json";
+            var json = JsonConvert.SerializeObject(retVal, Formatting.Indented, new Newtonsoft.Json.Converters.StringEnumConverter());
+            var fileName = saveFileName + ".json";
             if (verbose)
             {
                 Console.WriteLine("Read info file {0}", fileName);
@@ -51,7 +48,7 @@ namespace ConsoleApplication1.Parsers
             }
             if (saveFile)
             {
-                StreamWriter file = new StreamWriter(new FileStream(fileName, FileMode.Create));
+                var file = new StreamWriter(new FileStream(fileName, FileMode.Create));
                 file.Write(json);
                 file.Close();
             }

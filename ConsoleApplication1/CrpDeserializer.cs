@@ -1,7 +1,6 @@
 ﻿using ConsoleApplication1.Parsers;
 using CrpParser;
 using CrpParser.Utils;
-using ImageMagick;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,80 +8,82 @@ using System.IO;
 
 namespace ConsoleApplication1
 {
-	public class CrpDeserializer
+    internal class CrpDeserializer
     {
-        public string filePath;
-        private FileStream stream;
-        private CrpReader reader;
-        private AssetParser assetParser;
-        private Dictionary<string, int> typeRefCount = new Dictionary<string, int>();
+        private readonly AssetParser _assetParser;
 
-		/// <summary>
-		/// Initializes the object by opening the specified CRP file. Note and be prepared to handle the exceptions
-		/// that may be thrown.
-		/// </summary>
-		/// <param name="filePath">Path to the CRP file that needs to be opened.</param>
-		/// <exception cref="System.IO.IOException">Thrown if i.e the filePath parameter is incorrect, file is missing,
-		/// in use, etc.</exception>
-		public CrpDeserializer(string filePath)
+        /// <summary>
+        /// Initializes the object by opening the specified CRP file. Note and be prepared to handle the exceptions
+        /// that may be thrown.
+        /// </summary>
+        /// <param name="filePath">Path to the CRP file that needs to be opened.</param>
+        /// <exception cref="System.IO.IOException">Thrown if i.e the filePath parameter is incorrect, file is missing,
+        /// in use, etc.</exception>
+        public CrpDeserializer(AssetParser assetParser)
         {
-			stream = File.Open(filePath, FileMode.Open);
-            reader = new CrpReader(stream);
-            assetParser = new AssetParser(reader);
+            _assetParser = assetParser;
         }
 
-        public void parseFile(Options options)
+        public void ParseFile(FileInfo fileInfo, Boolean saveFiles, Boolean verbose)
         {
-            string magicStr = new string(reader.ReadChars(4));
-            if (magicStr.Equals(Consts.MAGICSTR))
+            if (!fileInfo.Exists) throw new InvalidOperationException($"can't find file: \"{fileInfo.FullName}\"");
+            using (var stream = File.Open(fileInfo.FullName, FileMode.Open))
             {
-                CrpHeader header = parseHeader();
+                var reader = new CrpReader(stream);
 
-                if (options.SaveFiles)
+                var magicStr = new String(reader.ReadChars(4));
+                if (magicStr.Equals(Consts.MAGICSTR))
                 {
-                    string path = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + header.mainAssetName + "_contents";
-                    if (!Directory.Exists(path))
+                    var header = ParseHeader(reader);
+
+                    if (saveFiles)
                     {
-                        Directory.CreateDirectory(path);
+                        var path = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + header.mainAssetName + "_contents";
+                        if (!Directory.Exists(path))
+                        {
+                            Directory.CreateDirectory(path);
+                        }
+                        Environment.CurrentDirectory = (path);
                     }
-                    Environment.CurrentDirectory = (path);
-                }
 
-                if (options.Verbose)
-                {
-                    Console.WriteLine(header);
-                }
-                if (options.SaveFiles)
-                {
-                    StreamWriter file = new StreamWriter(new FileStream(header.mainAssetName + "_header.json", FileMode.Create));
-                    string json = JsonConvert.SerializeObject(header, Formatting.Indented, new Newtonsoft.Json.Converters.StringEnumConverter());
-                    file.Write(json);
-                    file.Close();
-                }
-                if (header.isLut)
-                {
-                    parseLut(header, options.SaveFiles, options.Verbose);
+                    if (verbose)
+                    {
+                        Console.WriteLine(header);
+                    }
+                    if (saveFiles)
+                    {
+                        using var streamwriter = new StreamWriter(new FileStream(header.mainAssetName + "_header.json", FileMode.Create));
+                        var json = JsonConvert.SerializeObject(header, Formatting.Indented, new Newtonsoft.Json.Converters.StringEnumConverter());
+                        streamwriter.Write(json);
+                        streamwriter.Close();
+                    }
+                    if (header.isLut)
+                    {
+                        ParseLut(reader, header, saveFiles, verbose);
+                    }
+                    else
+                    {
+                        for (var i = 0; i < header.numAssets; i++)
+                        {
+                            ParseAssets(reader, header, i, saveFiles, verbose);
+                        }
+                    }
                 }
                 else
                 {
-                    for (int i = 0; i < header.numAssets; i++)
-                    {
-                        parseAssets(header, i, options.SaveFiles, options.Verbose);
-                    }
+                    throw new InvalidDataException("Invalid file format!");
                 }
-            }
-            else
-            {
-                throw new InvalidDataException("Invalid file format!");
-            }
+            };
         }
 
-        private CrpHeader parseHeader()
+        private static CrpHeader ParseHeader(CrpReader reader)
         {
-            CrpHeader output = new CrpHeader();
-            output.formatVersion = reader.ReadUInt16();
-            output.packageName = reader.ReadString();
-            string encryptedAuthor = reader.ReadString();
+            var output = new CrpHeader
+            {
+                formatVersion = reader.ReadUInt16(),
+                packageName = reader.ReadString()
+            };
+            var encryptedAuthor = reader.ReadString();
             if (encryptedAuthor.Length > 0)
             {
                 output.authorName = CryptoUtils.Decrypt(encryptedAuthor);
@@ -97,13 +98,15 @@ namespace ConsoleApplication1
             output.contentBeginIndex = reader.ReadInt64();
 
             output.assets = new List<CrpAssetInfoHeader>();
-            for (int i = 0; i < output.numAssets; i++)
+            for (var i = 0; i < output.numAssets; i++)
             {
-                CrpAssetInfoHeader info = new CrpAssetInfoHeader();
-                info.assetName = reader.ReadString();
-                info.assetChecksum = reader.ReadString();
-                info.assetType = (Consts.AssetTypeMapping)(reader.ReadInt32());
-                if(info.assetType == Consts.AssetTypeMapping.userLut)
+                var info = new CrpAssetInfoHeader
+                {
+                    assetName = reader.ReadString(),
+                    assetChecksum = reader.ReadString(),
+                    assetType = (Consts.AssetTypeMapping)(reader.ReadInt32())
+                };
+                if (info.assetType == Consts.AssetTypeMapping.userLut)
                 {
                     output.isLut = true;
                 }
@@ -121,49 +124,41 @@ namespace ConsoleApplication1
         /// </summary>
         /// <param name="header"></param>
         /// <param name="saveFiles"></param>
-        /// <param name="isVerbose"></param>
-        private void parseLut(CrpHeader header, bool saveFiles, bool isVerbose)
+        /// <param name="verbose"></param>
+        private static void ParseLut(CrpReader reader, CrpHeader header, Boolean saveFiles, Boolean verbose)
         {
             //Find the first instance of data(PNG file)
-            CrpAssetInfoHeader info = header.assets.Find(asset => asset.assetName.Contains(Consts.DATA_EXTENSION));
+            var info = header.assets.Find(asset => asset.assetName.Contains(Consts.DATA_EXTENSION));
 
             //Generate a name for the file
-            string fileName = string.Format("{0}.png", StrUtils.limitStr(info.assetName), info.assetType.ToString());
+            var fileName = $"{StrUtils.limitStr(info.assetName)}.png";
 
             //Should be unnessecary in current version(stream pointer should already be at start of file),
             //but advance stream pointer to file position
             reader.BaseStream.Seek(info.assetOffsetBegin, SeekOrigin.Current);
 
             //Read file and deal with it as apporiate.
-            MagickImage retVal = ImgParser.parseImgFile(reader, (uint)info.assetSize);
-            if (isVerbose)
+            var retVal = ImgParser.ParseImage(reader, saveFiles, fileName, info.assetSize, verbose);
+            if (verbose)
             {
                 Console.WriteLine("Read image file {0}", fileName);
             }
-            if (saveFiles)
-            {
-                retVal.Write(fileName);
-            }
-
-
         }
 
-        private void parseAssets(CrpHeader header, int index, bool saveFiles, bool isVerbose)
+        private void ParseAssets(CrpReader reader, CrpHeader header, Int32 index, Boolean saveFiles, Boolean isVerbose)
         {
-
-            bool isNullFlag = reader.ReadBoolean();
+            var isNullFlag = reader.ReadBoolean();
             if (!isNullFlag)
             {
-                string assemblyQualifiedName = reader.ReadString();
-                string assetType = assemblyQualifiedName.Split(new char[] { ',' })[0];
-                long assetContentLen = header.assets[index].assetSize - (2 + assemblyQualifiedName.Length);
-                string assetName = reader.ReadString();
+                var assemblyQualifiedName = reader.ReadString();
+                var assetType = assemblyQualifiedName.Split(',')[0];
+                var assetContentLen = header.assets[index].assetSize - (2 + assemblyQualifiedName.Length);
+                var assetName = reader.ReadString();
                 assetContentLen -= (1 + assetName.Length);
 
-                string fileName = string.Format("{0}_{1}_{2}", StrUtils.limitStr(assetName), index, header.assets[index].assetType.ToString());
-                assetParser.parseObject((int)assetContentLen, assetType, saveFiles, fileName, isVerbose);
-            } 
+                var fileName = $"{StrUtils.limitStr(assetName)}_{index}_{header.assets[index].assetType}";
+                _assetParser.ParseObject(reader, (Int32)assetContentLen, assetType, saveFiles, fileName, isVerbose);
+            }
         }
-
     }
 }
